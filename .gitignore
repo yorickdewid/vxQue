@@ -1,0 +1,7 @@
+# Folders
+bin/
+
+# Files
+*.o
+*.sublime-workspace
+config.json
