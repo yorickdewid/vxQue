@@ -7,12 +7,13 @@
 
 #include "common.h"
 
-#define RESTRICT_ROOT	1
+//#define RESTRICT_ROOT	1
 #define ADMIN_PASSWD_LENGTH	16
 
 void print_usage() {
 	printf("Usage: vxque [OPTION]\n\n");
 	printf(" -c, --config       Specify config\n");
+	printf(" -v, --verbose       Report results\n");
 	printf(" -h, --help         This help\n");
 }
 
@@ -31,16 +32,20 @@ int main(int argc, char *argv[]) {
 
 	static struct option long_options[] = {
 		{"config",       required_argument, 0,  'c' },
+		{"verbose",      required_argument, 0,  'v' },
 		{"help",         no_argument,       0,  'h' },
 		{0,              0,                 0,   0  }
 	};
 
 	int opt, long_index = 0;
-	while ((opt = getopt_long(argc, argv,"c:h", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv,"c:hv", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'c' :
 				strncpy(configname, optarg, 1024);
 				opt_config = 1;
+				break;
+			case 'v' :
+				verbose = 1;
 				break;
 			default:
 				print_usage(); 
@@ -55,6 +60,13 @@ int main(int argc, char *argv[]) {
 	config = parse_config(configname);
 	if (!config)
 		return 1;
+
+	if (!db_init(config))
+		return 1;
+
+	submitted_jobs();
+
+	db_close();
 
 	json_value_free(config);
 	return 0;
