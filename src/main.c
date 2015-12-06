@@ -13,7 +13,7 @@
 void print_usage() {
 	printf("Usage: vxque [OPTION]\n\n");
 	printf(" -c, --config       Specify config\n");
-	printf(" -v, --verbose       Report results\n");
+	printf(" -v, --verbose      Report results\n");
 	printf(" -h, --help         This help\n");
 }
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 				opt_config = 1;
 				break;
 			case 'v' :
-				verbose = 1;
+				//verbose = 1;
 				break;
 			default:
 				print_usage(); 

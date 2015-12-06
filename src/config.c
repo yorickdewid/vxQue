@@ -37,11 +37,11 @@ json_value *parse_config(char *filename) {
 	}
 	fclose(fp);
 
-	json_settings settings;
-	memset(&settings, 0, sizeof(json_settings));
+	//json_settings settings;
+	//memset(&settings, 0, sizeof(json_settings));
 
-	char error[128];
-	json_value *config = json_parse_ex(&settings, (json_char *)file_contents, file_size, error);
+	//char error[128];
+	json_value *config = json_parse((json_char *)file_contents, file_size);
 	if (!config) {
 		fprintf(stderr, "Unable to parse config\n");
 		free(file_contents);
@@ -56,4 +56,8 @@ json_value *parse_config(char *filename) {
 	}
 
 	return config;
+}
+
+int verify_config() {
+	return 1;
 }

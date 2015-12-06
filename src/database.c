@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <mysql/mysql.h>
 
-#include "json.h"
+#include "common.h"
 
 #define QUERY_SZ	1024
 
@@ -85,11 +85,22 @@ int submitted_jobs() {
 
 	while ((row = mysql_fetch_row(result))) { 
 		for(int i = 0; i < num_fields; ++i) { 
-			printf("%s\t", row[i] ? row[i] : "NULL\t"); 
+			printf("%s\t", row[i] ? row[i] : "NULL\t");
 		}
 		printf("\n");
 	}
 	printf("\n");
+
+	mysql_data_seek(result, 0);
+	while ((row = mysql_fetch_row(result))) { 
+		for(int i = 0; i < num_fields; ++i) { 
+			if (i == 0) {
+				if (row[i]) {
+					handle_action(row[i], row[i + 1], row[i + 2]);
+				}
+			}
+		}
+	}
 
 	mysql_free_result(result);
 	return 1;
