@@ -28,6 +28,7 @@ action_t handler[] = {
 
 int handle_action(char *id, char *action, char *param_object) {
 	json_value *param = NULL;
+	int execute = 0;
 
 	printf("Accepting job #%s\n", id);
 	printf("Job action: %s\n", action);
@@ -40,13 +41,19 @@ int handle_action(char *id, char *action, char *param_object) {
 
 	for (unsigned int i = 0; i < sizeof(handler) / sizeof(action_t); ++i){
 		if (!strcmp(handler[i].name, action)) {
-			printf("Executing job\n");
+			printf("Job executing\n");
 
 			update_job_pending(id);
 
 			handler[i].vfunc(param);
+			execute = 1;
 			break;
 		}
+	}
+
+	if (!execute) {
+		printf("Job rejected: unknown action\n");
+		update_job_rejected(id);
 	}
 
 	if (param)

@@ -123,6 +123,23 @@ void update_job_pending(char *id) {
 	return;
 }
 
+void update_job_rejected(char *id) {
+	char query[QUERY_SZ];
+	const char *sql = "UPDATE queue SET status='REJECTED' WHERE qid=%s;";
+
+	if (!conn)
+		return;
+
+	snprintf(query, QUERY_SZ, sql, id);
+	if (mysql_query(conn, query)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		mysql_close(conn);
+		return;
+	}
+
+	return;
+}
+
 void db_close() {
 	if (conn)
 		mysql_close(conn);

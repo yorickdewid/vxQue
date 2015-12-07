@@ -23,7 +23,7 @@ int add_user(json_value *param) {
 
 	FILE *cfp = popen(cmd, "r");
 	if (!cfp) {
-		puts("Failed to execute command");
+		return 0;
 	}
 
 	pclose(cfp);
@@ -47,7 +47,7 @@ int delete_user(json_value *param) {
 
 	FILE *cfp = popen(cmd, "r");
 	if (!cfp) {
-		puts("Failed to execute command");
+		return 0;
 	}
 
 	pclose(cfp);
