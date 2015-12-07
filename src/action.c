@@ -15,7 +15,7 @@ typedef struct {
 	enum action action;
 	char *name;
 	int params;
-	int (* vfunc)(json_value *param);
+	char *(* vfunc)(json_value *param);
 } action_t;
 
 action_t handler[] = {
@@ -45,7 +45,11 @@ int handle_action(char *id, char *action, char *param_object) {
 
 			update_job_pending(id);
 
-			handler[i].vfunc(param);
+			char *rs = handler[i].vfunc(param);
+			if (!rs)
+				update_job_done(id, 0, NULL);
+			else
+				update_job_done(id, 1, rs);
 			execute = 1;
 			break;
 		}

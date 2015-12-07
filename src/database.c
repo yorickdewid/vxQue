@@ -108,7 +108,7 @@ int submitted_jobs() {
 
 void update_job_pending(char *id) {
 	char query[QUERY_SZ];
-	const char *sql = "UPDATE queue SET started=NOW(), status='PENDING' WHERE qid=%s;";
+	const char *sql = "UPDATE queue SET started=NOW(), status='PENDING' WHERE qid=%s";
 
 	if (!conn)
 		return;
@@ -125,12 +125,22 @@ void update_job_pending(char *id) {
 
 void update_job_rejected(char *id, char *result) {
 	char query[QUERY_SZ];
-	const char *sql = "UPDATE queue SET status='REJECTED', result='%s' WHERE qid=%s;";
 
 	if (!conn)
 		return;
 
-	snprintf(query, QUERY_SZ, sql, result, id);
+	if (result) {
+		size_t psz = strlen(result);
+		char esc_result[2 * psz + 1];
+		const char *sql = "UPDATE queue SET status='REJECTED', result='%s' WHERE qid=%s";
+		mysql_real_escape_string(conn, esc_result, result, psz);
+
+		snprintf(query, QUERY_SZ, sql, esc_result, id);
+	} else {
+		const char *sql = "UPDATE queue SET status='REJECTED' WHERE qid=%s;";
+		snprintf(query, QUERY_SZ, sql, id);
+	}
+
 	if (mysql_query(conn, query)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		mysql_close(conn);
@@ -143,15 +153,25 @@ void update_job_rejected(char *id, char *result) {
 
 void update_job_done(char *id, int success, char *result) {
 	char query[QUERY_SZ];
-	const char *sql = "UPDATE queue SET finished=NOW(), status='%s', result='%s' WHERE qid=%s;";
+	char *status_msg = "DONE";
 
 	if (!conn)
 		return;
 
-	if (success)
-		snprintf(query, QUERY_SZ, sql, "DONE", result, id);
-	else
-		snprintf(query, QUERY_SZ, sql, "FAILED", result, id);
+	if (!success)
+		status_msg = "FAILED";
+
+	if (result) {
+		size_t psz = strlen(result);
+		char esc_result[2 * psz + 1];
+		const char *sql = "UPDATE queue SET finished=NOW(), status='%s', result='%s' WHERE qid=%s";
+		mysql_real_escape_string(conn, esc_result, result, psz);
+
+		snprintf(query, QUERY_SZ, sql, status_msg, esc_result, id);
+	} else {
+		const char *sql = "UPDATE queue SET finished=NOW(), status='%s', WHERE qid=%s";
+		snprintf(query, QUERY_SZ, sql, status_msg, id);
+	}
 
 	if (mysql_query(conn, query)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));

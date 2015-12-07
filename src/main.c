@@ -45,7 +45,6 @@ int main(int argc, char *argv[]) {
 				opt_config = 1;
 				break;
 			case 'v' :
-				//verbose = 1;
 				break;
 			default:
 				print_usage(); 

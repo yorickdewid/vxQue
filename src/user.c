@@ -6,12 +6,12 @@
 
 #include "common.h"
 
-int add_user(json_value *param) {
+char *add_user(json_value *param) {
 	char cmd[1024];
 	char *username = NULL;
 
 	if (param->type != json_object)
-		return 0;
+		return NULL;
 
 	if (!strcmp(param->u.object.values[0].name, "user")) {
 		printf("Creating new user %s\n", param->u.object.values[0].value->u.string.ptr);
@@ -20,22 +20,26 @@ int add_user(json_value *param) {
 
 	strcpy(cmd, "useradd -s /bin/bash ");
 	strcat(cmd, username);
+	strcat(cmd, " 2>&1");
 
 	FILE *cfp = popen(cmd, "r");
 	if (!cfp) {
-		return 0;
+		return NULL;
 	}
 
+	char *rs = (char *)malloc(1024);
+	while (fgets(rs, 1024, cfp) != NULL);
+
 	pclose(cfp);
-	return 1;
+	return rs;
 }
 
-int delete_user(json_value *param) {
+char *delete_user(json_value *param) {
 	char cmd[1024];
 	char *username = NULL;
 
 	if (param->type != json_object)
-		return 0;
+		return NULL;
 
 	if (!strcmp(param->u.object.values[0].name, "user")) {
 		printf("Deleting user %s\n", param->u.object.values[0].value->u.string.ptr);
@@ -44,12 +48,16 @@ int delete_user(json_value *param) {
 
 	strcpy(cmd, "userdel -r ");
 	strcat(cmd, username);
+	strcat(cmd, " 2>&1");
 
 	FILE *cfp = popen(cmd, "r");
 	if (!cfp) {
-		return 0;
+		return NULL;
 	}
 
+	char *rs = (char *)malloc(1024);
+	while (fgets(rs, 1024, cfp) != NULL);
+
 	pclose(cfp);
-	return 1;
+	return rs;
 }
