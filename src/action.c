@@ -41,7 +41,11 @@ int handle_action(char *id, char *action, char *param_object) {
 	for (unsigned int i = 0; i < sizeof(handler) / sizeof(action_t); ++i){
 		if (!strcmp(handler[i].name, action)) {
 			printf("Executing job\n");
+
+			update_job_pending(id);
+
 			handler[i].vfunc(param);
+			break;
 		}
 	}
 
