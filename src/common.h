@@ -3,11 +3,14 @@
 
 #include "json.h"
 
+char *strdup(const char *str);
+
 json_value *parse_config(char *filename);
 int db_init(json_value *config);
 int submitted_jobs();
 void update_job_pending(char *id);
-void update_job_rejected(char *id);
+void update_job_rejected(char *id, char *result);
+void update_job_done(char *id, int success, char *result);
 void db_close();
 
 int handle_action(char *id, char *action, char *param_object);

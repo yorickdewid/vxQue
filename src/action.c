@@ -53,7 +53,7 @@ int handle_action(char *id, char *action, char *param_object) {
 
 	if (!execute) {
 		printf("Job rejected: unknown action\n");
-		update_job_rejected(id);
+		update_job_rejected(id, strdup("unknown action"));
 	}
 
 	if (param)

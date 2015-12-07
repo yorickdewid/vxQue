@@ -123,20 +123,43 @@ void update_job_pending(char *id) {
 	return;
 }
 
-void update_job_rejected(char *id) {
+void update_job_rejected(char *id, char *result) {
 	char query[QUERY_SZ];
-	const char *sql = "UPDATE queue SET status='REJECTED' WHERE qid=%s;";
+	const char *sql = "UPDATE queue SET status='REJECTED', result='%s' WHERE qid=%s;";
 
 	if (!conn)
 		return;
 
-	snprintf(query, QUERY_SZ, sql, id);
+	snprintf(query, QUERY_SZ, sql, result, id);
 	if (mysql_query(conn, query)) {
 		fprintf(stderr, "%s\n", mysql_error(conn));
 		mysql_close(conn);
 		return;
 	}
 
+	free(result);
+	return;
+}
+
+void update_job_done(char *id, int success, char *result) {
+	char query[QUERY_SZ];
+	const char *sql = "UPDATE queue SET finished=NOW(), status='%s', result='%s' WHERE qid=%s;";
+
+	if (!conn)
+		return;
+
+	if (success)
+		snprintf(query, QUERY_SZ, sql, "DONE", result, id);
+	else
+		snprintf(query, QUERY_SZ, sql, "FAILED", result, id);
+
+	if (mysql_query(conn, query)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		mysql_close(conn);
+		return;
+	}
+
+	free(result);
 	return;
 }
 
