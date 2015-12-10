@@ -64,7 +64,7 @@ char *delete_user(json_value *param, int *success) {
 	rtn += invoke_exec("userdel -r %s ", username);
 
 	if (rtn > 0) {
-		return "User setup failed";
+		return "User deletion failed";
 	}
 
 	*success = 1;

@@ -4,7 +4,6 @@
 #include "json.h"
 
 char *strdup(const char *str);
-char *strmcon(char *str1, char *str2);
 int invoke_exec(const char *command, ...);
 
 json_value *parse_config(char *filename);
@@ -20,6 +19,7 @@ int handle_action(char *id, char *action, char *param_object);
 char *add_user(json_value *param, int *success);
 char *delete_user(json_value *param, int *success);
 char *create_vhost(json_value *param, int *success);
+char *delete_vhost(json_value *param, int *success);
 char *verify_config();
 char *send_mail(json_value *param, int *success);
 

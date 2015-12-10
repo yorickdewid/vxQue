@@ -9,6 +9,7 @@ enum action {
 	MAILSEND,
 	CONFIGCHECK,
 	CREATEVHOST,
+	DELETEVHOST,
 	RELOADSERVICE,
 	RESTARTSERVICE,
 };
@@ -24,8 +25,9 @@ action_t handler[] = {
 	{USERADD,		"USERADD",		1, 	add_user},
 	{USERDEL,		"USERDEL",		1,	delete_user},
 	// {MAILSEND,		"MAILSEND",		1,	send_mail},
-	// {CONFIGCHECK,	"CONFIGCHECK",	0,	verify_config},
+	{CONFIGCHECK,	"CONFIGCHECK",	0,	verify_config},
 	{CREATEVHOST,	"CREATEVHOST",	1,	create_vhost},
+	{DELETEVHOST,	"DELETEVHOST",	1,	delete_vhost},
 };
 
 int handle_action(char *id, char *action, char *param_object) {
@@ -57,7 +59,7 @@ int handle_action(char *id, char *action, char *param_object) {
 
 	if (!execute) {
 		printf("Job rejected: unknown action\n");
-		update_job_rejected(id, strdup("unknown action"));
+		update_job_rejected(id, "unknown action");
 	}
 
 	if (param)

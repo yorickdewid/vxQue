@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 #include "json.h"
+#include "common.h"
 
 json_value *parse_config(char *filename) {
 	struct stat filestatus;
@@ -54,6 +55,16 @@ json_value *parse_config(char *filename) {
 	return config;
 }
 
-int verify_config() {
-	return 1;
+char *verify_config(json_value *param __attribute__((unused)), int *success) {
+	printf("Verify config\n");
+
+	int rtn = 0;
+	rtn += invoke_exec("vxadmin -c /etc/vxpanel.conf -v");
+
+	if (rtn > 0) {
+		return "Config file invalid";
+	}
+	
+	*success = 1;
+	return "Config OK";
 }
