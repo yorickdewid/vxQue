@@ -1,63 +1,72 @@
-#define _DEFAULT_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
 
 #include "common.h"
 
-char *add_user(json_value *param) {
-	char cmd[1024];
+char *add_user(json_value *param, int *success) {
 	char *username = NULL;
 
 	if (param->type != json_object)
-		return NULL;
+		return "Invalid parameters";
 
 	if (!strcmp(param->u.object.values[0].name, "user")) {
 		printf("Creating new user %s\n", param->u.object.values[0].value->u.string.ptr);
 		username = param->u.object.values[0].value->u.string.ptr;
 	}
 
-	strcpy(cmd, "useradd -s /bin/bash ");
-	strcat(cmd, username);
-	strcat(cmd, " 2>&1");
-
-	FILE *cfp = popen(cmd, "r");
-	if (!cfp) {
-		return NULL;
+	if (!username) {
+		return "Not all parameters are given";
 	}
 
-	char *rs = (char *)malloc(1024);
-	while (fgets(rs, 1024, cfp) != NULL);
+	if (getpwnam(username)) {
+		return "User already exists";
+	}
 
-	pclose(cfp);
-	return rs;
+	int rtn = 0;
+	rtn += invoke_exec("useradd -s /bin/bash %s ", username);
+	rtn += invoke_exec("mkdir -p /home/%s/bin", username);
+	rtn += invoke_exec("mkdir -p /home/%s/etc", username);
+	rtn += invoke_exec("mkdir -p /home/%s/www", username);
+	rtn += invoke_exec("mkdir -p /home/%s/logs", username);
+	rtn += invoke_exec("chown -R %s:%s /home/%s/*", username, username, username);
+	rtn += invoke_exec("chmod +x /home/%s/", username);
+
+	if (rtn > 0) {
+		return "User setup failed";
+	}
+	
+	*success = 1;
+	return "User setup";
 }
 
-char *delete_user(json_value *param) {
-	char cmd[1024];
+char *delete_user(json_value *param, int *success) {
 	char *username = NULL;
 
 	if (param->type != json_object)
-		return NULL;
+		return "Invalid parameters";
 
 	if (!strcmp(param->u.object.values[0].name, "user")) {
 		printf("Deleting user %s\n", param->u.object.values[0].value->u.string.ptr);
 		username = param->u.object.values[0].value->u.string.ptr;
 	}
 
-	strcpy(cmd, "userdel -r ");
-	strcat(cmd, username);
-	strcat(cmd, " 2>&1");
-
-	FILE *cfp = popen(cmd, "r");
-	if (!cfp) {
-		return NULL;
+	if (!username) {
+		return "Not all parameters are given";
 	}
 
-	char *rs = (char *)malloc(1024);
-	while (fgets(rs, 1024, cfp) != NULL);
+	if (!getpwnam(username)) {
+		return "User does not exist";
+	}
 
-	pclose(cfp);
-	return rs;
+	int rtn = 0;
+	rtn += invoke_exec("userdel -r %s ", username);
+
+	if (rtn > 0) {
+		return "User setup failed";
+	}
+
+	*success = 1;
+	return "User deleted";
 }

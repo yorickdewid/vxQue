@@ -147,7 +147,6 @@ void update_job_rejected(char *id, char *result) {
 		return;
 	}
 
-	free(result);
 	return;
 }
 
@@ -169,7 +168,7 @@ void update_job_done(char *id, int success, char *result) {
 
 		snprintf(query, QUERY_SZ, sql, status_msg, esc_result, id);
 	} else {
-		const char *sql = "UPDATE queue SET finished=NOW(), status='%s', WHERE qid=%s";
+		const char *sql = "UPDATE queue SET finished=NOW(), status='%s' WHERE qid=%s";
 		snprintf(query, QUERY_SZ, sql, status_msg, id);
 	}
 
@@ -179,7 +178,6 @@ void update_job_done(char *id, int success, char *result) {
 		return;
 	}
 
-	free(result);
 	return;
 }
 

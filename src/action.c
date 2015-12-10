@@ -8,14 +8,16 @@ enum action {
 	USERDEL,
 	MAILSEND,
 	CONFIGCHECK,
-	CREATEVHOST
+	CREATEVHOST,
+	RELOADSERVICE,
+	RESTARTSERVICE,
 };
 
 typedef struct {
 	enum action action;
 	char *name;
 	int params;
-	char *(* vfunc)(json_value *param);
+	char *(* vfunc)(json_value *param, int *success);
 } action_t;
 
 action_t handler[] = {
@@ -23,7 +25,7 @@ action_t handler[] = {
 	{USERDEL,		"USERDEL",		1,	delete_user},
 	// {MAILSEND,		"MAILSEND",		1,	send_mail},
 	// {CONFIGCHECK,	"CONFIGCHECK",	0,	verify_config},
-	// {CREATEVHOST,	"CREATEVHOST",	1,	create_vhost},
+	{CREATEVHOST,	"CREATEVHOST",	1,	create_vhost},
 };
 
 int handle_action(char *id, char *action, char *param_object) {
@@ -45,11 +47,9 @@ int handle_action(char *id, char *action, char *param_object) {
 
 			update_job_pending(id);
 
-			char *rs = handler[i].vfunc(param);
-			if (!rs)
-				update_job_done(id, 0, NULL);
-			else
-				update_job_done(id, 1, rs);
+			int success = 0;
+			char *rs = handler[i].vfunc(param, &success);
+			update_job_done(id, success, rs);
 			execute = 1;
 			break;
 		}
