@@ -10,8 +10,11 @@ enum action {
 	CONFIGCHECK,
 	CREATEVHOST,
 	DELETEVHOST,
+
 	RELOADSERVICE,
 	RESTARTSERVICE,
+	CREATEDATABASE,
+	DELETEDATABASE,
 };
 
 typedef struct {
@@ -22,12 +25,14 @@ typedef struct {
 } action_t;
 
 action_t handler[] = {
-	{USERADD,		"USERADD",		1, 	add_user},
-	{USERDEL,		"USERDEL",		1,	delete_user},
-	// {MAILSEND,		"MAILSEND",		1,	send_mail},
-	{CONFIGCHECK,	"CONFIGCHECK",	0,	verify_config},
-	{CREATEVHOST,	"CREATEVHOST",	1,	create_vhost},
-	{DELETEVHOST,	"DELETEVHOST",	1,	delete_vhost},
+	{USERADD,			"USERADD",			1, 	add_user},
+	{USERDEL,			"USERDEL",			1,	delete_user},
+	// {MAILSEND,		"MAILSEND",			1,	send_mail},
+	{CREATEDATABASE,	"CREATEDATABASE",	1,	create_database},
+	{DELETEDATABASE,	"DELETEDATABASE",	1,	delete_database},
+	{CONFIGCHECK,		"CONFIGCHECK",		0,	verify_config},
+	{CREATEVHOST,		"CREATEVHOST",		1,	create_vhost},
+	{DELETEVHOST,		"DELETEVHOST",		1,	delete_vhost},
 };
 
 int handle_action(char *id, char *action, char *param_object) {

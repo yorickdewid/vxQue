@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pwd.h>
 #include <sys/stat.h>
 #include <mysql/mysql.h>
 
@@ -184,4 +185,78 @@ void update_job_done(char *id, int success, char *result) {
 void db_close() {
 	if (conn)
 		mysql_close(conn);
+}
+
+char *create_database(json_value *param, int *success) {
+	char query[QUERY_SZ];
+	char *username = NULL;
+	char *database = NULL;
+
+	if (param->type != json_object)
+		return "Invalid parameters";
+
+	for (unsigned int x = 0; x < param->u.object.length; ++x) {
+		if (!strcmp(param->u.object.values[x].name, "user")) {
+			username = param->u.object.values[x].value->u.string.ptr;
+		} else if (!strcmp(param->u.object.values[x].name, "database")) {
+			database = param->u.object.values[x].value->u.string.ptr;
+		}
+	}
+
+	if (!username || !database) {
+		return "Not all parameters are given";
+	}
+
+	if (!getpwnam(username)) {
+		return "User does not exist";
+	}
+
+	const char *sql = "CREATE DATABASE %s_%s";
+	snprintf(query, QUERY_SZ, sql, username, database);
+
+	if (mysql_query(conn, query)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		mysql_close(conn);
+		return "Createing database failed";
+	}
+
+	*success = 1;
+	return "Database created";
+}
+
+char *delete_database(json_value *param, int *success) {
+	char query[QUERY_SZ];
+	char *username = NULL;
+	char *database = NULL;
+
+	if (param->type != json_object)
+		return "Invalid parameters";
+
+	for (unsigned int x = 0; x < param->u.object.length; ++x) {
+		if (!strcmp(param->u.object.values[x].name, "user")) {
+			username = param->u.object.values[x].value->u.string.ptr;
+		} else if (!strcmp(param->u.object.values[x].name, "database")) {
+			database = param->u.object.values[x].value->u.string.ptr;
+		}
+	}
+
+	if (!username || !database) {
+		return "Not all parameters are given";
+	}
+
+	/*if (!getpwnam(username)) {
+		return "User does not exist";
+	}*/
+
+	const char *sql = "DROP DATABASE IF EXISTS %s_%s";
+	snprintf(query, QUERY_SZ, sql, username, database);
+
+	if (mysql_query(conn, query)) {
+		fprintf(stderr, "%s\n", mysql_error(conn));
+		mysql_close(conn);
+		return "Dropping database failed";
+	}
+
+	*success = 1;
+	return "Database dropping";
 }

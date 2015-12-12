@@ -15,17 +15,4 @@ int invoke_exec(const char *command, ...) {
 	vsprintf(cmd, command, list);
 
 	return system(cmd);
-
-	/*FILE *cfp = popen(cmd, "r");
-	if (!cfp) {
-		return NULL;
-	}
-
-	char *rs = (char *)malloc(1024);
-	while (fgets(rs, 1024, cfp) != NULL);
-
-	pclose(cfp);
-	va_end(list);
-	return rs;*/
-	return NULL;
 }
